@@ -214,6 +214,10 @@ func buildDashboard(ctx context.Context, cli *client.Client, opts ...Option) (*D
 			dashboard.footer.SetPaused(dashboard.paused)
 
 			return nil
+		case defOptions.allowShell && event.Key() == tcell.KeyCtrlRightSq:
+			dashboard.suspendToShell()
+
+			return nil
 		}
 
 		return event

@@ -90,6 +90,12 @@ const (
 	// KernelParamDashboardConsole is the kernel parameter name for specifying the dashboard console.
 	KernelParamDashboardConsole = "talos.dashboard.console"
 
+	// KernelParamDashboardShell is the kernel parameter name for controlling the dashboard debug shell.
+	//
+	// The debug shell is enabled automatically when a shell binary is present in the image
+	// (shipped by the debug-tools system extension); set this parameter to 0 to disable it.
+	KernelParamDashboardShell = "talos.dashboard.shell"
+
 	// KernelParamEnvironment is the kernel parameter name for passing process environment.
 	KernelParamEnvironment = "talos.environment"
 

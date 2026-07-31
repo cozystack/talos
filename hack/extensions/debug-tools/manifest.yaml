@@ -1,0 +1,18 @@
+version: v1alpha1
+metadata:
+  name: debug-tools
+  version: v0.1.0
+  author: Ænix
+  description: |
+    Console debug tooling for Talos: busybox and iproute2 installed into
+    /usr/local/bin.
+
+    Stock Talos images contain no shell. With this extension installed the
+    dashboard offers an interactive shell on the console via Ctrl+], which
+    makes a node debuggable when its network is down.
+
+    This is a debugging aid: it puts a root shell behind physical/IPMI console
+    access. Do not install it on production nodes.
+  compatibility:
+    talos:
+      version: ">= v1.12.0"

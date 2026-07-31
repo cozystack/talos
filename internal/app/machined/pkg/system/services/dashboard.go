@@ -8,6 +8,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -21,6 +22,7 @@ import (
 	"github.com/siderolabs/talos/internal/app/machined/pkg/system/runner/restart"
 	"github.com/siderolabs/talos/internal/pkg/capability"
 	"github.com/siderolabs/talos/internal/pkg/console"
+	"github.com/siderolabs/talos/internal/pkg/debugshell"
 	"github.com/siderolabs/talos/pkg/conditions"
 	"github.com/siderolabs/talos/pkg/machinery/constants"
 )
@@ -105,10 +107,7 @@ func (d *Dashboard) Runner(r runtime.Runtime) (runner.Runner, error) {
 		return nil, fmt.Errorf("failed to determine console device: %w", err)
 	}
 
-	return restart.New(process.NewRunner(false, &runner.Args{
-		ID:          d.ID(r),
-		ProcessArgs: []string{"/sbin/dashboard"},
-	},
+	opts := []runner.Option{
 		runner.WithLoggingManager(r.Logging()),
 		runner.WithEnv([]string{
 			"TERM=linux",
@@ -119,11 +118,32 @@ func (d *Dashboard) Runner(r runtime.Runtime) (runner.Runner, error) {
 		runner.WithStdoutFile(tty),
 		runner.WithCtty(0),
 		runner.WithOOMScoreAdj(-400),
-		runner.WithDroppedCapabilities(capability.AllCapabilitiesSetLowercase()),
 		runner.WithSelinuxLabel(constants.SelinuxLabelDashboard),
 		runner.WithCgroupPath(constants.CgroupDashboard),
-		runner.WithUID(constants.DashboardUserID),
 		runner.WithPriority(constants.DashboardPriority),
+	}
+
+	// The debug shell is spawned as a child of the dashboard, so it inherits the
+	// dashboard's user and capabilities. An unprivileged shell cannot do the
+	// things it is needed for (e.g. `ip link set`), so when the image ships a
+	// shell, keep the dashboard privileged.
+	//
+	// This trades console security for debuggability and is why debug images must
+	// never be used in production.
+	if debugshell.Enabled() {
+		log.Printf("dashboard: debug shell enabled, running dashboard privileged")
+	} else {
+		opts = append(opts,
+			runner.WithDroppedCapabilities(capability.AllCapabilitiesSetLowercase()),
+			runner.WithUID(constants.DashboardUserID),
+		)
+	}
+
+	return restart.New(process.NewRunner(false, &runner.Args{
+		ID:          d.ID(r),
+		ProcessArgs: []string{"/sbin/dashboard"},
+	},
+		opts...,
 	),
 		restart.WithType(restart.Forever),
 	), nil

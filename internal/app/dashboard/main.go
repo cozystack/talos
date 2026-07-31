@@ -22,6 +22,7 @@ import (
 	"github.com/siderolabs/talos/internal/app/machined/pkg/runtime/v1alpha1/platform"
 	metalurl "github.com/siderolabs/talos/internal/app/machined/pkg/runtime/v1alpha1/platform/metal/url"
 	"github.com/siderolabs/talos/internal/pkg/dashboard"
+	"github.com/siderolabs/talos/internal/pkg/debugshell"
 	"github.com/siderolabs/talos/pkg/grpc/middleware/authz"
 	"github.com/siderolabs/talos/pkg/machinery/client"
 	"github.com/siderolabs/talos/pkg/machinery/constants"
@@ -69,7 +70,11 @@ func dashboardMain() error {
 		}
 	}
 
-	return dashboard.Run(ctx, c, dashboard.WithAllowExitKeys(false), dashboard.WithScreens(screens...))
+	return dashboard.Run(ctx, c,
+		dashboard.WithAllowExitKeys(false),
+		dashboard.WithAllowShell(debugshell.Enabled()),
+		dashboard.WithScreens(screens...),
+	)
 }
 
 func showConfigURLTab() bool {

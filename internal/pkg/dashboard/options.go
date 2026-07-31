@@ -11,6 +11,7 @@ import (
 type options struct {
 	interval      time.Duration
 	allowExitKeys bool
+	allowShell    bool
 	screens       []Screen
 }
 
@@ -40,6 +41,14 @@ func WithInterval(interval time.Duration) Option {
 func WithAllowExitKeys(allowExitKeys bool) Option {
 	return func(o *options) {
 		o.allowExitKeys = allowExitKeys
+	}
+}
+
+// WithAllowShell sets whether the dashboard should allow suspending into an
+// interactive shell (Ctrl + ]).
+func WithAllowShell(allowShell bool) Option {
+	return func(o *options) {
+		o.allowShell = allowShell
 	}
 }
 
