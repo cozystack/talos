@@ -186,6 +186,7 @@ func buildDashboard(ctx context.Context, cli *client.Client, opts ...Option) (*D
 	})
 
 	dashboard.footer = components.NewFooter(screenKeyToName, nodes)
+	dashboard.footer.SetShellHint(defOptions.allowShell)
 
 	dashboard.app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		config, screenOk := screenConfigByKeyCode[event.Key()]
@@ -214,7 +215,10 @@ func buildDashboard(ctx context.Context, cli *client.Client, opts ...Option) (*D
 			dashboard.footer.SetPaused(dashboard.paused)
 
 			return nil
-		case defOptions.allowShell && event.Key() == tcell.KeyCtrlRightSq:
+		// F9 is offered next to Ctrl+] because remote consoles (IPMI/SOL, VNC)
+		// often fail to deliver the control combination, while function keys
+		// come through reliably.
+		case defOptions.allowShell && (event.Key() == tcell.KeyCtrlRightSq || event.Key() == tcell.KeyF9):
 			dashboard.suspendToShell()
 
 			return nil

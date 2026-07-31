@@ -25,6 +25,7 @@ type Footer struct {
 
 	selectedScreen string
 	paused         bool
+	shellHint      bool
 }
 
 // NewFooter initializes Footer.
@@ -88,6 +89,16 @@ func (widget *Footer) SetPaused(paused bool) {
 	widget.refresh()
 }
 
+// SetShellHint advertises the debug shell key binding in the footer.
+//
+// It doubles as the signal that the image actually ships a shell: if the hint is
+// absent, the dashboard found no shell binary and the binding is inert.
+func (widget *Footer) SetShellHint(shellHint bool) {
+	widget.shellHint = shellHint
+
+	widget.refresh()
+}
+
 func (widget *Footer) refresh() {
 	widget.SetText(fmt.Sprintf(
 		"[%s] --- %s",
@@ -129,6 +140,10 @@ func (widget *Footer) screensText() string {
 		} else {
 			screenTexts = append(screenTexts, fmt.Sprintf("[%s: %s]", screenKey, screen))
 		}
+	}
+
+	if widget.shellHint {
+		screenTexts = append(screenTexts, "[[green]F9 / Ctrl+]: Shell[-]]")
 	}
 
 	if widget.paused {
