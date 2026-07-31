@@ -6,9 +6,19 @@ dashboard. This branch adds an interactive shell reachable from the dashboard.
 
 ## What it does
 
-Press **`F9`** or **`Ctrl+]`** on the console: the dashboard UI suspends, the
-terminal is handed to an interactive shell, and the dashboard is restored when
-the shell exits (`exit` or `Ctrl+D`).
+Press **`F9`** or **`Ctrl+]`** on the console: the active console switches to an
+interactive root shell on **tty3**, and switches back to the dashboard when the
+shell exits (`exit` or `Ctrl+D`).
+
+The consoles are independent, so they can also be reached directly:
+
+| Key | Console |
+|---|---|
+| `Alt+F1` | kernel logs |
+| `Alt+F2` | dashboard |
+| `Alt+F3` | debug shell |
+
+The dashboard keeps running while you are in the shell.
 
 `F9` exists because remote consoles (IPMI/SOL, VNC) routinely fail to deliver
 `Ctrl+]` — their keymaps do not necessarily produce `0x1D`. Function keys come
@@ -16,6 +26,15 @@ through reliably.
 
 The footer advertises the binding when a shell is available. No hint means the
 image ships no shell and the binding is inert.
+
+### Why the shell gets its own console
+
+Running it on the dashboard's console does not work. tcell drives that one in
+raw mode with echo off and keeps re-applying it, so a shell there receives
+keystrokes and executes them but echoes nothing and prints no prompt — typing is
+blind. That cannot be fixed from inside: neither resetting the terminal before
+starting the shell nor `stty sane` within it survives. A separate virtual
+console has sane settings and no contention.
 
 ## Why it is split in two parts
 
@@ -89,6 +108,7 @@ Built from this branch and booted as a KubeVirt VM, checked over VNC:
   `dashboard: debug shell enabled, running dashboard privileged`
 - footer shows the `F9 / Ctrl+]: Shell` hint
 - both `F9` and `Ctrl+]` open the shell
+- the shell prompts (`talos# `) and echoes what is typed
 - in the shell: `uid=0 gid=0`, `ip utility, iproute2-6.15.0`,
-  `ip -o -4 addr show` returns the live interface list
-- `exit` restores the dashboard
+  `ip -o link show` returns the live interface list including bond members
+- `exit` switches back to the dashboard
