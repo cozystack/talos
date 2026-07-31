@@ -39,6 +39,10 @@ const Path = "/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin"
 var ErrNotFound = errors.New("no shell binary found in the image: install the debug-tools system extension")
 
 // Find returns argv for the first shell binary available in the image.
+//
+// The shell is always asked to be interactive: it inherits the dashboard's
+// session rather than being started from a login, and without -i busybox ash
+// decides it is non-interactive and prints no prompt at all.
 func Find() ([]string, error) {
 	for _, candidate := range Candidates {
 		st, err := os.Stat(candidate)
@@ -48,10 +52,10 @@ func Find() ([]string, error) {
 
 		// busybox is a multi-call binary, it needs the applet name.
 		if filepath.Base(candidate) == "busybox" {
-			return []string{candidate, "sh"}, nil
+			return []string{candidate, "sh", "-i"}, nil
 		}
 
-		return []string{candidate}, nil
+		return []string{candidate, "-i"}, nil
 	}
 
 	return nil, ErrNotFound
