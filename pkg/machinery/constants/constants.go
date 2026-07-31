@@ -1199,6 +1199,12 @@ const (
 	// DashboardTTY is the number of the TTY device (/dev/ttyN) for dashboard.
 	DashboardTTY = 2
 
+	// DebugShellTTY is the number of the TTY device (/dev/ttyN) for the debug shell.
+	//
+	// The shell gets a console of its own: the dashboard's is driven by tcell in
+	// raw mode with echo off, so a shell sharing it would echo nothing.
+	DebugShellTTY = 3
+
 	// FlannelVersion is the version of flannel to use.
 	//
 	// Note: while updating, make sure to copy flannel image from docker.io to ghcr.io:
