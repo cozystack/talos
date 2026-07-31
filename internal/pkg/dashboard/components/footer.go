@@ -33,6 +33,7 @@ type Footer struct {
 
 	selectedScreen string
 	paused         bool
+	shellHint      bool
 
 	hitRegions []hitRegion
 
@@ -129,6 +130,16 @@ func (widget *Footer) SetPaused(paused bool) {
 	widget.refresh()
 }
 
+// SetShellHint advertises the debug shell key binding in the footer.
+//
+// It doubles as the signal that the image actually ships a shell: if the hint is
+// absent, the dashboard found no shell binary and the binding is inert.
+func (widget *Footer) SetShellHint(shellHint bool) {
+	widget.shellHint = shellHint
+
+	widget.refresh()
+}
+
 // refresh rebuilds the footer text and updates hit regions for mouse click detection.
 //
 // The footer format is: [node1 | node2 | node3] --- [F1: Screen1] --- [Screen2] --- ...
@@ -203,6 +214,12 @@ func (widget *Footer) refresh() {
 			endX:   x,
 			screen: screenName,
 		})
+	}
+
+	if widget.shellHint {
+		// [[green]F9 / Ctrl+]: Shell[-]] renders as [F9 / Ctrl+]: Shell] — not clickable.
+		write(" --- ", 5)
+		write("[[green]F9 / Ctrl+]: Shell[-]]", 20)
 	}
 
 	if widget.paused {

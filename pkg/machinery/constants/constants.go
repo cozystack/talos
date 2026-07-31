@@ -85,6 +85,12 @@ const (
 	// KernelParamDashboardConsole is the kernel parameter name for specifying the dashboard console.
 	KernelParamDashboardConsole = "talos.dashboard.console"
 
+	// KernelParamDashboardShell is the kernel parameter name for controlling the dashboard debug shell.
+	//
+	// The debug shell is enabled automatically when a shell binary is present in the image
+	// (shipped by the debug-tools system extension); set this parameter to 0 to disable it.
+	KernelParamDashboardShell = "talos.dashboard.shell"
+
 	// KernelParamEnvironment is the kernel parameter name for passing process environment.
 	KernelParamEnvironment = "talos.environment"
 
@@ -1181,6 +1187,12 @@ const (
 
 	// DashboardTTY is the number of the TTY device (/dev/ttyN) for dashboard.
 	DashboardTTY = 2
+
+	// DebugShellTTY is the number of the TTY device (/dev/ttyN) for the debug shell.
+	//
+	// The shell gets a console of its own: the dashboard's is driven by tcell in
+	// raw mode with echo off, so a shell sharing it would echo nothing.
+	DebugShellTTY = 3
 
 	// FlannelVersion is the version of flannel to use.
 	//
